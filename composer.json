@@ -1,0 +1,35 @@
+{
+    "name": "fdevs/backup",
+    "type": "library",
+    "description": "FDevs Backup Component",
+    "keywords": [],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Andrey Samusev",
+            "email": "andrey_simfi@list.ru",
+            "homepage": "http://andrey.4devs.io"
+        },
+        {
+            "name": "4devs Community",
+            "homepage": "https://github.com/4devs/backup/contributors"
+        }
+    ],
+    "require": {
+        "symfony/process": "~2.8|~3.0",
+        "symfony/filesystem": "~2.8|~3.0",
+        "php": ">=5.5.9 || ^7.0"
+    },
+    "require-dev": {
+    },
+    "suggest": {
+    },
+    "autoload": {
+        "psr-4": {
+            "FDevs\\Backup\\": ""
+        },
+        "exclude-from-classmap": [
+            "/Tests/"
+        ]
+    }
+}
