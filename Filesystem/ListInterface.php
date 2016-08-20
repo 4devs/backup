@@ -5,7 +5,7 @@ namespace FDevs\Backup\Filesystem;
 interface ListInterface
 {
     /**
-     * @return array|string[]
+     * @return \Iterator
      */
     public function keyList();
 }

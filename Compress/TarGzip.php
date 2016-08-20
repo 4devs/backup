@@ -9,7 +9,7 @@ class TarGzip extends AbstractCompression
      */
     protected function getPackCommand($source, $target)
     {
-        return sprintf('tar -cvzf %s %s', $target, $source);
+        return sprintf('tar -cvzf %s -C %s .', $target, $source);
     }
 
     /**
@@ -23,7 +23,7 @@ class TarGzip extends AbstractCompression
     /**
      * {@inheritdoc}
      */
-    protected function getExtension()
+    public function getExtension()
     {
         return '.tar.gz';
     }

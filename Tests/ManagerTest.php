@@ -2,32 +2,98 @@
 
 namespace FDevs\Backup\Tests;
 
-use FDevs\Backup\Compress\TarGzip;
-use FDevs\Backup\Filesystem\Local;
+use FDevs\Backup\Filesystem\FilesystemInterface;
 use FDevs\Backup\Manager;
-use FDevs\Backup\Source\Folder;
+use FDevs\Backup\Source\DataProviderInterface;
 
 class ManagerTest extends AbstractTest
 {
     /**
-     * @var Manager
+     * test list.
      */
-    private $manager;
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setUp()
+    public function testListKey()
     {
-        $this->manager = new Manager(
-            new Folder(__DIR__.DIRECTORY_SEPARATOR.'../Source', __DIR__.DIRECTORY_SEPARATOR.'source/Source'),
-            new Local(__DIR__.DIRECTORY_SEPARATOR.'source/', __DIR__.DIRECTORY_SEPARATOR.'dump/'),
-            new TarGzip(__DIR__.DIRECTORY_SEPARATOR.'dump/')
-        );
+        $source = $this->getDataProviderMock();
+        $filesystem = $this->getFilesystemMock();
+        $filesystem
+            ->expects($this->once())
+            ->method('keyList')
+            ->willReturn(new \ArrayIterator())
+        ;
+
+        $manager = new Manager($source, $filesystem);
+        $list = $manager->keyList();
+        $this->assertInstanceOf(\Iterator::class, $list);
+        $this->assertEquals(null, $list->current());
     }
 
+    /**
+     * test dump.
+     */
     public function testDump()
     {
-        $this->manager->dump();
+        $source = $this->getDataProviderMock();
+        $source
+            ->expects($this->once())
+            ->method('dump')
+            ->with([])
+            ->willReturn('testdump')
+        ;
+
+        $filesystem = $this->getFilesystemMock();
+        $filesystem
+            ->expects($this->once())
+            ->method('upload')
+            ->with('testdump')
+            ->willReturn('uploadtestdump')
+        ;
+
+        $manager = new Manager($source, $filesystem);
+        $key = $manager->dump();
+        $this->assertEquals('uploadtestdump', $key);
+    }
+
+    /**
+     * @depends  testDump
+     * @depends  testListKey
+     */
+    public function testRestore()
+    {
+        $key = 'testkey';
+        $source = $this->getDataProviderMock();
+        $source
+            ->expects($this->once())
+            ->method('restore')
+            ->with('downloadtest')
+            ->willReturn(true)
+        ;
+
+        $filesystem = $this->getFilesystemMock();
+        $filesystem
+            ->expects($this->once())
+            ->method('download')
+            ->with($key)
+            ->willReturn('downloadtest')
+        ;
+
+        $manager = new Manager($source, $filesystem);
+        $key = $manager->restore($key);
+        $this->assertTrue($key);
+    }
+
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject|DataProviderInterface
+     */
+    protected function getDataProviderMock()
+    {
+        return $this->createMock(DataProviderInterface::class);
+    }
+
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject|FilesystemInterface
+     */
+    protected function getFilesystemMock()
+    {
+        return $this->createMock(FilesystemInterface::class);
     }
 }

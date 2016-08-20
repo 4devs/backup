@@ -2,10 +2,16 @@
 
 namespace FDevs\Backup\Source;
 
+use FDevs\Backup\Exception\DataProviderException;
+
 interface DumpInterface
 {
     /**
-     * @return string filename
+     * @param array $options
+     *
+     * @return string
+     *
+     * @throws DataProviderException
      */
-    public function dump();
+    public function dump(array $options = []);
 }

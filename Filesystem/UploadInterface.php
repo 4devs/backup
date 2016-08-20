@@ -7,7 +7,7 @@ interface UploadInterface
     /**
      * @param string $file
      *
-     * @return bool
+     * @return string
      */
     public function upload($file);
 }

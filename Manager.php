@@ -3,14 +3,15 @@
 namespace FDevs\Backup;
 
 use FDevs\Backup\Compress\CompressionInterface;
-use FDevs\Backup\Source\SourceInterface;
+use FDevs\Backup\Source\DataProviderInterface;
 use FDevs\Backup\Filesystem\FilesystemInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class Manager
 {
     /**
-     * @var SourceInterface
+     * @var DataProviderInterface
      */
     private $source;
 
@@ -30,26 +31,36 @@ class Manager
     private $local;
 
     /**
+     * @var OptionsResolver
+     */
+    private $resolver;
+
+    /**
      * Manager constructor.
      *
-     * @param SourceInterface           $source
+     * @param DataProviderInterface     $source
      * @param FilesystemInterface       $filesystem
      * @param CompressionInterface|null $compressor
      */
-    public function __construct(SourceInterface $source, FilesystemInterface $filesystem, CompressionInterface $compressor = null)
+    public function __construct(DataProviderInterface $source, FilesystemInterface $filesystem, CompressionInterface $compressor = null)
     {
         $this->source = $source;
         $this->filesystem = $filesystem;
         $this->compressor = $compressor;
         $this->local = new Filesystem();
+        $this->resolver = new OptionsResolver();
+        $this->source->configureOption($this->resolver);
     }
 
     /**
+     * @param array $options
+     *
      * @return string
      */
-    public function dump()
+    public function dump(array $options = [])
     {
-        $source = $this->source->dump();
+        $options = $this->resolver->resolve($options);
+        $source = $this->source->dump($options);
         $file = $this->pack($source);
         $key = $this->filesystem->upload($file);
         $this->local->remove($file);
@@ -60,15 +71,16 @@ class Manager
 
     /**
      * @param string $key
+     * @param array  $options
      *
      * @return bool
      */
-    public function restore($key)
+    public function restore($key, array $options = [])
     {
+        $options = $this->resolver->resolve($options);
         $file = $this->filesystem->download($key);
         $source = $this->unpack($file);
-
-        $status = $this->source->restore($source);
+        $status = $this->source->restore($source, $options);
         $this->local->remove($source);
         $this->local->remove($file);
 
@@ -76,7 +88,7 @@ class Manager
     }
 
     /**
-     * @return array|\string[]
+     * @return \Iterator
      */
     public function keyList()
     {
@@ -90,7 +102,13 @@ class Manager
      */
     private function pack($source)
     {
-        return $this->compressor ? $this->compressor->pack($source) : $source;
+        $target = null;
+        if ($this->compressor) {
+            $target = $source.$this->compressor->getExtension();
+            $this->compressor->pack($source, $target);
+        }
+
+        return $target ?: $source;
     }
 
     /**
@@ -100,6 +118,13 @@ class Manager
      */
     private function unpack($target)
     {
-        return $this->compressor ? $this->compressor->unpack($target) : $target;
+        $source = null;
+        if ($this->compressor) {
+            $source = dirname($target).DIRECTORY_SEPARATOR.uniqid(mt_rand());
+            $this->local->mkdir($source);
+            $this->compressor->unpack($target, $source);
+        }
+
+        return $source ?: $target;
     }
 }

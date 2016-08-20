@@ -8,10 +8,11 @@ interface ExtractInterface
 {
     /**
      * @param string $archive
+     * @param string $source
      *
      * @return string
      *
      * @throws ExtractException
      */
-    public function unpack($archive);
+    public function unpack($archive, $source);
 }

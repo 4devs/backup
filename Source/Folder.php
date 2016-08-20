@@ -3,8 +3,9 @@
 namespace FDevs\Backup\Source;
 
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class Folder implements SourceInterface
+class Folder extends AbstractDataProvider
 {
     /**
      * @var string
@@ -14,7 +15,7 @@ class Folder implements SourceInterface
     /**
      * @var string
      */
-    private $distFolder;
+    private $dumpFolder;
 
     /**
      * @var Filesystem
@@ -25,32 +26,49 @@ class Folder implements SourceInterface
      * Folder constructor.
      *
      * @param string $sourceFolder
-     * @param string $distFolder
+     * @param string $dumpFolder
      */
-    public function __construct($sourceFolder, $distFolder)
+    public function __construct($sourceFolder, $dumpFolder)
     {
         $this->sourceFolder = $sourceFolder;
-        $this->distFolder = $distFolder;
+        $this->dumpFolder = $dumpFolder;
         $this->filesystem = new Filesystem();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function dump()
+    public function dump(array $options = [])
     {
-        $this->filesystem->mirror($this->sourceFolder, $this->distFolder.DIRECTORY_SEPARATOR.uniqid('folder_'));
+        $key = $this->getDumpName($options, $this->dumpFolder);
+        $this->filesystem->mirror($options['source'], $key);
 
-        return $this->distFolder;
+        return $key;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function restore($target)
+    public function restore($target, array $options = [])
     {
-        $this->filesystem->mirror($target, $this->sourceFolder);
+        $this->filesystem->mirror($target, $options['source'], null, $options);
 
         return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function configureOption(OptionsResolver $resolver)
+    {
+        parent::configureOption($resolver);
+        $resolver
+            ->setDefaults([
+                'source' => $this->sourceFolder,
+                'prefix' => basename($this->sourceFolder),
+            ])
+            ->addAllowedTypes('source', ['string'])
+            ->setDefined(['source'])
+        ;
     }
 }

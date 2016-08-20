@@ -8,10 +8,11 @@ interface ArchiveInterface
 {
     /**
      * @param string $source
+     * @param string $archive
      *
-     * @return string
+     * @return bool
      *
      * @throws ArchiveException
      */
-    public function pack($source);
+    public function pack($source, $archive);
 }
