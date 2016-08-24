@@ -8,23 +8,7 @@ use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 class LocalFileTest extends AbstractLocalTest
 {
     /**
-     * @var string
-     */
-    private $source;
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setUp()
-    {
-        parent::setUp();
-        $this->source = $this->workspace.DIRECTORY_SEPARATOR.'tmpfile.sql';
-        $fp = fopen($this->source, 'w+');
-        fwrite($fp, 'rand'.mt_rand());
-    }
-
-    /**
-     * test expect exception
+     * test expect exception.
      */
     public function testUploadException()
     {
@@ -34,7 +18,7 @@ class LocalFileTest extends AbstractLocalTest
     }
 
     /**
-     * test expect exception
+     * test expect exception.
      */
     public function testDownloadException()
     {
@@ -50,7 +34,6 @@ class LocalFileTest extends AbstractLocalTest
     {
         $localFs = $this->createFilesystem();
         $upload = $localFs->upload($this->source);
-        $this->assertInternalType('string', $upload);
         $this->assertEquals($this->workspace.DIRECTORY_SEPARATOR.$this->dumpFolder.DIRECTORY_SEPARATOR.basename($this->source), $upload);
         $this->assertFileExists($upload);
         $this->assertFileEquals($upload, $this->source);
@@ -66,7 +49,6 @@ class LocalFileTest extends AbstractLocalTest
         $localFs = $this->createFilesystem();
         $upload = $localFs->upload($this->source);
         $file = $localFs->download($upload);
-        $this->assertInternalType('string', $file);
         $this->assertStringStartsWith($this->workspace.DIRECTORY_SEPARATOR.$this->dumpFolder, $file);
         $this->assertFileExists($file);
         $this->assertFileEquals($file, $this->source);
