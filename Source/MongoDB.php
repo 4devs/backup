@@ -62,7 +62,6 @@ class MongoDB extends ProcessDataProvider
         if ($options['override']) {
             $cmd .= ' --drop';
         }
-        var_dump($this->addOptions($cmd, $options));
 
         return $this->addOptions($cmd, $options);
     }
