@@ -24,7 +24,7 @@ abstract class ProcessDataProvider extends AbstractDataProvider
 
     /**
      * @param string $source
-     * @param array  $options
+     * @param array $options
      *
      * @return string
      */
@@ -32,7 +32,7 @@ abstract class ProcessDataProvider extends AbstractDataProvider
 
     /**
      * @param string $target
-     * @param array  $options
+     * @param array $options
      *
      * @return string
      */
@@ -58,6 +58,22 @@ abstract class ProcessDataProvider extends AbstractDataProvider
     }
 
     /**
+     * @param array $options
+     * @param array $keys
+     * @return string
+     */
+    protected function prepareOptions(array $options = [], array $keys = [])
+    {
+        $cmd = '';
+        foreach ($keys as $key) {
+            if ($options[$key]) {
+                $cmd .= ' --' . $key . ($options[$key] === true ? '' : sprintf('=%s', $options[$key]));
+            }
+        }
+        return $cmd;
+    }
+
+    /**
      * @param string $command
      *
      * @return bool
@@ -68,6 +84,7 @@ abstract class ProcessDataProvider extends AbstractDataProvider
     {
         $pr = new Process($command);
         $pr->run();
+        var_dump($command);
         if (!$pr->isSuccessful()) {
             throw new DataProviderException($pr->getErrorOutput(), $pr->getExitCode());
         }
