@@ -76,6 +76,39 @@ $manager->restore($key,$options);//restore data
 $manager->keyList();//show all keys in uses filesystem
 ```
 
+### dump/restore mysql with compress
+
+```php
+<?php
+use FDevs\Backup\Manager;
+use FDevs\Backup\Source\Mysql;
+use FDevs\Backup\Filesystem\LocalFile;
+use FDevs\Backup\Compress\TarGzip;
+
+$dumpFolder = __DIR__.'/dump/';//dump folder if ypu use local dump
+$tmpFolder = __DIR__.'/tmp/'; //tmp folder MUST be writable
+$options = [
+    'host' => 'localhost',// Specifies a resolvable hostname for the mysqldump to which to connect. default localhost
+    'port' => 3306, //Specifies the TCP port on which the Mysql server instance listens for client connections. Delault 3306
+    'databases'=>['dbname'],// Specifies a database to backup. If you do not specify a database, copies all databases in this instance into the dump files.
+    'user'=>'symfony', //Specifies a username with which to authenticate to a Mysql database that uses authentication.
+    'password'=>'symfony', //Specifies a password with which to authenticate to a Mysql database that uses authentication.
+    'override' => false,//Before restoring the collections from the dumped backup, drops the tables from the target database.
+];
+
+$source = new Mysql($tmpFolder);
+$filesystem = new LocalFile($dumpFolder);
+$compress = new TarGzip();
+
+$manager = new Manager($source,$filesystem,$compress);
+$key = $manager->dump($options);
+echo $key;//show key dumped folder
+
+$manager->restore($key,$options);//restore data
+
+$manager->keyList();//show all keys in uses filesystem
+```
+
 License
 -------
 
