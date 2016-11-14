@@ -41,7 +41,7 @@ class Gaufrette implements FilesystemInterface
     public function download($target)
     {
         $key = $this->cacheDir.DIRECTORY_SEPARATOR.uniqid(mt_rand());
-            $this->filesystem->dumpFile($key, $this->gaufrette->read($target));
+        $this->filesystem->dumpFile($key, $this->gaufrette->read($target));
 
         return $key;
     }

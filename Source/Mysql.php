@@ -2,7 +2,6 @@
 
 namespace FDevs\Backup\Source;
 
-
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -30,7 +29,7 @@ class Mysql extends ProcessDataProvider
     ];
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     protected function getDumpCommand($source, array $options = [])
     {
@@ -48,7 +47,7 @@ class Mysql extends ProcessDataProvider
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     protected function getRestoreCommand($target, array $options = [])
     {
@@ -61,7 +60,7 @@ class Mysql extends ProcessDataProvider
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function configureOption(OptionsResolver $resolver)
     {
@@ -81,7 +80,8 @@ class Mysql extends ProcessDataProvider
                 'tables' => [],
                 'filename' => function (Options $options) {
                     $names = $options['databases'] + $options['tables'] + $options['ignore-table'];
-                    return (count($names) ? implode('-', $names) : 'all-databases') . '.sql';
+
+                    return (count($names) ? implode('-', $names) : 'all-databases').'.sql';
                 },
                 'all-databases' => function (Options $options) {
                     return !count($options['databases']);
@@ -124,6 +124,4 @@ class Mysql extends ProcessDataProvider
             ->setAllowedTypes('quick', ['boolean'])
             ->setAllowedTypes('disable-keys', ['boolean']);
     }
-
-
 }

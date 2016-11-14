@@ -7,7 +7,6 @@ use Gaufrette\Filesystem;
 
 class GaufretteTest extends AbstractFilesystemTest
 {
-
     /**
      * {@inheritdoc}
      */
