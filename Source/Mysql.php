@@ -12,7 +12,6 @@ class Mysql extends ProcessDataProvider
      */
     private $defiled = [
         'all-databases',
-        'tables',
         'create-options',
         'delayed',
         'disable-keys',
@@ -68,7 +67,7 @@ class Mysql extends ProcessDataProvider
 
         $resolver
             ->setRequired(['host', 'port'])
-            ->setDefined($this->defiled + ['where', 'databases', 'ignore-table', 'tables', 'filename'])
+            ->setDefined(array_merge($this->defiled, ['where', 'databases', 'ignore-table', 'tables', 'filename']))
             ->setDefaults([
                 'port' => 3306,
                 'host' => 'localhost',
@@ -79,9 +78,9 @@ class Mysql extends ProcessDataProvider
                 'ignore-table' => [],
                 'tables' => [],
                 'filename' => function (Options $options) {
-                    $names = $options['databases'] + $options['tables'] + $options['ignore-table'];
+                    $names = array_merge($options['databases'], $options['tables'], $options['ignore-table']);
 
-                    return (count($names) ? implode('-', $names) : 'all-databases').'.sql';
+                    return (count($names) ? implode('-', $names) : 'all-databases') . '.sql';
                 },
                 'all-databases' => function (Options $options) {
                     return !count($options['databases']);
