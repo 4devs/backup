@@ -24,7 +24,7 @@ abstract class ProcessDataProvider extends AbstractDataProvider
 
     /**
      * @param string $source
-     * @param array  $options
+     * @param array $options
      *
      * @return string
      */
@@ -32,7 +32,7 @@ abstract class ProcessDataProvider extends AbstractDataProvider
 
     /**
      * @param string $target
-     * @param array  $options
+     * @param array $options
      *
      * @return string
      */
@@ -67,8 +67,10 @@ abstract class ProcessDataProvider extends AbstractDataProvider
     {
         $cmd = '';
         foreach ($keys as $key) {
-            if ($options[$key]) {
-                $cmd .= ' --'.$key.($options[$key] === true ? '' : sprintf('=%s', $options[$key]));
+            if (is_string($options[$key]) && $options[$key]) {
+                $cmd .= sprintf(' --%s=%s', $key, $options[$key]);
+            } elseif (is_bool($options[$key]) && $options[$key]) {
+                $cmd .= ' --' . $key;
             }
         }
 

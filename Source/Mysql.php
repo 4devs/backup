@@ -8,31 +8,11 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class Mysql extends ProcessDataProvider
 {
     /**
-     * @var array
-     */
-    private $defiled = [
-        'all-databases',
-        'create-options',
-        'delayed',
-        'disable-keys',
-        'force',
-        'extended-insert',
-        'add-drop-database',
-        'add-drop-table',
-        'no-create-db',
-        'no-data',
-        'skip-opt',
-        'quick',
-        'password',
-        'user',
-    ];
-
-    /**
      * {@inheritdoc}
      */
     protected function getDumpCommand($source, array $options = [])
     {
-        $optional = $this->prepareOptions($options, $this->defiled);
+        $optional = $this->prepareOptions($options, $this->getDumpOptions());
         $optional .= count($options['ignore-table']) ? sprintf(' --ignore-table=%s', implode(' --ignore-table=', $options['ignore-table'])) : '';
         $optional .= $options['where'] ? sprintf(" --where='%s'", $options['where']) : '';
         $optional .= count($options['databases']) ? sprintf(' --databases %s', implode(' ', $options['databases'])) : '';
@@ -43,6 +23,30 @@ class Mysql extends ProcessDataProvider
         }
 
         return sprintf('mysqldump --host=%s --port=%s %s > %s/%s', $options['host'], $options['port'], $optional, $source, $options['filename']);
+    }
+
+    /**
+     * @return array
+     */
+    protected function getDumpOptions()
+    {
+        return [
+            'all-databases',
+            'create-options',
+            'delayed-insert',
+            'disable-keys',
+            'force',
+            'extended-insert',
+            'add-drop-database',
+            'add-drop-table',
+            'no-create-db',
+            'no-data',
+            'skip-opt',
+            'quick',
+            'lock-tables',
+            'password',
+            'user',
+        ];
     }
 
     /**
@@ -67,7 +71,7 @@ class Mysql extends ProcessDataProvider
 
         $resolver
             ->setRequired(['host', 'port'])
-            ->setDefined(array_merge($this->defiled, ['where', 'databases', 'ignore-table', 'tables', 'filename']))
+            ->setDefined(array_merge($this->getDumpOptions(), ['where', 'databases', 'ignore-table', 'tables', 'filename']))
             ->setDefaults([
                 'port' => 3306,
                 'host' => 'localhost',
@@ -87,13 +91,14 @@ class Mysql extends ProcessDataProvider
                 },
                 'create-options' => false,
                 'extended-insert' => false,
-                'delayed' => false,
+                'delayed-insert' => false,
                 'disable-keys' => false,
                 'force' => false,
                 'no-create-db' => false,
                 'no-data' => false,
                 'skip-opt' => false,
                 'quick' => false,
+                'lock-tables' => false,
                 'add-drop-database' => function (Options $options) {
                     return $options['override'];
                 },
@@ -104,6 +109,7 @@ class Mysql extends ProcessDataProvider
             ->setAllowedTypes('databases', ['array'])
             ->setAllowedTypes('tables', ['array'])
             ->setAllowedTypes('ignore-table', ['array'])
+            ->setAllowedTypes('lock-tables', ['boolean', 'string'])
             ->setAllowedTypes('where', ['string'])
             ->setAllowedTypes('filename', ['string'])
             ->setAllowedTypes('port', ['integer'])
@@ -111,16 +117,16 @@ class Mysql extends ProcessDataProvider
             ->setAllowedTypes('password', ['string', 'null'])
             ->setAllowedTypes('user', ['string', 'null'])
             ->setAllowedTypes('all-databases', ['boolean'])
-            ->setAllowedTypes('add-drop-database', ['boolean'])
-            ->setAllowedTypes('add-drop-table', ['boolean'])
-            ->setAllowedTypes('create-options', ['boolean'])
-            ->setAllowedTypes('delayed', ['boolean'])
-            ->setAllowedTypes('force', ['boolean'])
-            ->setAllowedTypes('extended-insert', ['boolean'])
-            ->setAllowedTypes('no-create-db', ['boolean'])
-            ->setAllowedTypes('no-data', ['boolean'])
+            ->setAllowedTypes('add-drop-database', ['boolean', 'string'])
+            ->setAllowedTypes('add-drop-table', ['boolean', 'string'])
+            ->setAllowedTypes('create-options', ['boolean', 'string'])
+            ->setAllowedTypes('delayed-insert', ['boolean', 'string'])
+            ->setAllowedTypes('force', ['boolean', 'string'])
+            ->setAllowedTypes('extended-insert', ['boolean', 'string'])
+            ->setAllowedTypes('no-create-db', ['boolean', 'string'])
+            ->setAllowedTypes('no-data', ['boolean', 'string'])
             ->setAllowedTypes('skip-opt', ['boolean'])
-            ->setAllowedTypes('quick', ['boolean'])
-            ->setAllowedTypes('disable-keys', ['boolean']);
+            ->setAllowedTypes('quick', ['boolean', 'string'])
+            ->setAllowedTypes('disable-keys', ['boolean', 'string']);
     }
 }
