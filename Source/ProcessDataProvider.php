@@ -84,10 +84,10 @@ abstract class ProcessDataProvider extends AbstractDataProvider
      *
      * @throws DataProviderException
      */
-    private function execute($command)
+    protected function execute($command)
     {
         $pr = new Process($command);
-        $pr->run();
+        $pr->setTimeout(null)->run();
 
         if (!$pr->isSuccessful()) {
             throw new DataProviderException($pr->getErrorOutput(), $pr->getExitCode());
