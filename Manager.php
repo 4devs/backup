@@ -38,8 +38,8 @@ class Manager
     /**
      * Manager constructor.
      *
-     * @param DataProviderInterface     $source
-     * @param FilesystemInterface       $filesystem
+     * @param DataProviderInterface $source
+     * @param FilesystemInterface $filesystem
      * @param CompressionInterface|null $compressor
      */
     public function __construct(DataProviderInterface $source, FilesystemInterface $filesystem, CompressionInterface $compressor = null)
@@ -59,30 +59,44 @@ class Manager
      */
     public function dump(array $options = [])
     {
-        $options = $this->resolver->resolve($options);
-        $source = $this->source->dump($options);
-        $file = $this->pack($source);
-        $key = $this->filesystem->upload($file);
-        $this->local->remove($file);
-        $this->local->remove($source);
+        try {
+            $options = $this->resolver->resolve($options);
+            $source = $this->source->dump($options);
+            $file = $this->pack($source);
+            $key = $this->filesystem->upload($file);
+        } finally {
+            if ($this->local->exists($file)) {
+                $this->local->remove($file);
+            }
+            if ($this->local->exists($source)) {
+                $this->local->remove($source);
+            }
+        }
 
         return $key;
     }
 
     /**
      * @param string $key
-     * @param array  $options
+     * @param array $options
      *
      * @return bool
      */
     public function restore($key, array $options = [])
     {
-        $options = $this->resolver->resolve($options);
-        $file = $this->filesystem->download($key);
-        $source = $this->unpack($file);
-        $status = $this->source->restore($source, $options);
-        $this->local->remove($source);
-        $this->local->remove($file);
+        try {
+            $options = $this->resolver->resolve($options);
+            $file = $this->filesystem->download($key);
+            $source = $this->unpack($file);
+            $status = $this->source->restore($source, $options);
+        } finally {
+            if ($this->local->exists($file)) {
+                $this->local->remove($file);
+            }
+            if ($this->local->exists($source)) {
+                $this->local->remove($source);
+            }
+        }
 
         return $status;
     }
@@ -104,7 +118,7 @@ class Manager
     {
         $target = null;
         if ($this->compressor) {
-            $target = $source.$this->compressor->getExtension();
+            $target = $source . $this->compressor->getExtension();
             $this->compressor->pack($source, $target);
         }
 
@@ -120,7 +134,7 @@ class Manager
     {
         $source = null;
         if ($this->compressor) {
-            $source = dirname($target).DIRECTORY_SEPARATOR.uniqid(mt_rand());
+            $source = dirname($target) . DIRECTORY_SEPARATOR . uniqid(mt_rand());
             $this->local->mkdir($source);
             $this->compressor->unpack($target, $source);
         }
