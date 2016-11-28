@@ -40,6 +40,7 @@ class Mysql extends ProcessDataProvider
             'add-drop-database',
             'add-drop-table',
             'no-create-db',
+            'no-create-info',
             'no-data',
             'skip-opt',
             'quick',
@@ -95,6 +96,7 @@ class Mysql extends ProcessDataProvider
                 'disable-keys' => false,
                 'force' => false,
                 'no-create-db' => false,
+                'no-create-info' => false,
                 'no-data' => false,
                 'skip-opt' => false,
                 'quick' => false,
@@ -124,6 +126,7 @@ class Mysql extends ProcessDataProvider
             ->setAllowedTypes('force', ['boolean', 'string'])
             ->setAllowedTypes('extended-insert', ['boolean', 'string'])
             ->setAllowedTypes('no-create-db', ['boolean', 'string'])
+            ->setAllowedTypes('no-create-info', ['boolean', 'string'])
             ->setAllowedTypes('no-data', ['boolean', 'string'])
             ->setAllowedTypes('skip-opt', ['boolean'])
             ->setAllowedTypes('quick', ['boolean', 'string'])
