@@ -65,10 +65,10 @@ class Manager
             $file = $this->pack($source);
             $key = $this->filesystem->upload($file);
         } finally {
-            if ($this->local->exists($file)) {
+            if ($file && $this->local->exists($file)) {
                 $this->local->remove($file);
             }
-            if ($this->local->exists($source)) {
+            if ($source && $this->local->exists($source)) {
                 $this->local->remove($source);
             }
         }
@@ -90,10 +90,10 @@ class Manager
             $source = $this->unpack($file);
             $status = $this->source->restore($source, $options);
         } finally {
-            if ($this->local->exists($file)) {
+            if ($file && $this->local->exists($file)) {
                 $this->local->remove($file);
             }
-            if ($this->local->exists($source)) {
+            if ($source && $this->local->exists($source)) {
                 $this->local->remove($source);
             }
         }
