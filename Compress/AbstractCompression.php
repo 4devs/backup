@@ -4,43 +4,15 @@ namespace FDevs\Backup\Compress;
 
 use FDevs\Backup\Exception\ArchiveException;
 use FDevs\Backup\Exception\ExtractException;
+use FDevs\Backup\Process\FactoryInterface;
 use Symfony\Component\Process\Process;
 
 abstract class AbstractCompression implements CompressionInterface
 {
     /**
-     * @var null|string
+     * @var FactoryInterface
      */
-    private $cwd;
-
-    /**
-     * @var null|array
-     */
-    private $env;
-
-    /**
-     * @var null|array
-     */
-    private $input;
-
-    /**
-     * @var null|int|float
-     */
-    private $timeout;
-
-    /**
-     * @param null|string     $cwd     The working directory or null to use the working dir of the current PHP process
-     * @param null|array      $env     The env variables or null to use the same environment as the current PHP process
-     * @param null|mixed      $input   The input as stream resource, scalar or \Traversable, or null for no input
-     * @param null|int|float  $timeout The timeout in seconds or null to disable
-     */
-    public function __construct($cwd = null, $env = null, $input = null, $timeout = 60)
-    {
-        $this->cwd = $cwd;
-        $this->env = $env;
-        $this->input = $input;
-        $this->timeout = $timeout;
-    }
+    private $processFactory;
 
     /**
      * @param string $source
@@ -89,12 +61,24 @@ abstract class AbstractCompression implements CompressionInterface
     }
 
     /**
+     * @param FactoryInterface $factory
+     *
+     * @return AbstractCompression
+     */
+    public function setProcessFactory(FactoryInterface $factory)
+    {
+        $this->processFactory = $factory;
+
+        return $this;
+    }
+
+    /**
      * @param string $command
      *
      * @return Process
      */
     private function createProcess($command)
     {
-        return new Process($command, $this->cwd, $this->env, $this->input, $this->timeout);
+        return $this->processFactory ? $this->processFactory->create($command) : new Process($command);
     }
 }
