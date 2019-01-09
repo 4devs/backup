@@ -2,6 +2,7 @@
 
 namespace FDevs\Backup\Tests;
 
+use FDevs\Backup\Exception\DataProviderException;
 use FDevs\Backup\Filesystem\FilesystemInterface;
 use FDevs\Backup\Manager;
 use FDevs\Backup\Source\DataProviderInterface;
@@ -54,6 +55,32 @@ class ManagerTest extends AbstractTest
     }
 
     /**
+     * @depends testDump
+     */
+    public function testDumpSourceFail()
+    {
+        $exception = new DataProviderException();
+        $source = $this->getDataProviderMock();
+        $source
+            ->expects($this->once())
+            ->method('dump')
+            ->with([])
+            ->willThrowException($exception)
+        ;
+
+        $filesystem = $this->getFilesystemMock();
+
+        $manager = new Manager($source, $filesystem);
+
+        try {
+            $manager->dump();
+            $this->fail('Expect DataProviderException::class exception, but that not thrown');
+        } catch (\Exception $e) {
+            $this->assertSame($exception, $e);
+        }
+    }
+
+    /**
      * @depends  testDump
      * @depends  testListKey
      */
@@ -77,8 +104,35 @@ class ManagerTest extends AbstractTest
         ;
 
         $manager = new Manager($source, $filesystem);
-        $key = $manager->restore($key);
-        $this->assertTrue($key);
+        $success = $manager->restore($key);
+        $this->assertTrue($success);
+    }
+
+    /**
+     * @depends testRestore
+     */
+    public function testRestoreFilesystemFail()
+    {
+        $key = 'testkey';
+        $source = $this->getDataProviderMock();
+
+        $exception = new DataProviderException();
+        $filesystem = $this->getFilesystemMock();
+        $filesystem
+            ->expects($this->once())
+            ->method('download')
+            ->with($key)
+            ->willThrowException($exception)
+        ;
+
+        $manager = new Manager($source, $filesystem);
+
+        try {
+            $manager->restore($key);
+            $this->fail('Expect DataProviderException::class exception, but that not thrown');
+        } catch (\Exception $e) {
+            $this->assertSame($exception, $e);
+        }
     }
 
     /**

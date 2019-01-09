@@ -3,6 +3,9 @@
 namespace FDevs\Backup;
 
 use FDevs\Backup\Compress\CompressionInterface;
+use FDevs\Backup\Exception\ArchiveException;
+use FDevs\Backup\Exception\DataProviderException;
+use FDevs\Backup\Exception\ExtractException;
 use FDevs\Backup\Source\DataProviderInterface;
 use FDevs\Backup\Filesystem\FilesystemInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -55,6 +58,9 @@ class Manager
     /**
      * @param array $options
      *
+     * @throws DataProviderException
+     * @throws ArchiveException
+     *
      * @return string
      */
     public function dump(array $options = [])
@@ -65,10 +71,10 @@ class Manager
             $file = $this->pack($source);
             $key = $this->filesystem->upload($file);
         } finally {
-            if ($file && $this->local->exists($file)) {
+            if (isset($file) && $this->local->exists($file)) {
                 $this->local->remove($file);
             }
-            if ($source && $this->local->exists($source)) {
+            if (isset($source) && $this->local->exists($source)) {
                 $this->local->remove($source);
             }
         }
@@ -80,6 +86,9 @@ class Manager
      * @param string $key
      * @param array $options
      *
+     * @throws DataProviderException
+     * @throws ExtractException
+     *
      * @return bool
      */
     public function restore($key, array $options = [])
@@ -90,10 +99,10 @@ class Manager
             $source = $this->unpack($file);
             $status = $this->source->restore($source, $options);
         } finally {
-            if ($file && $this->local->exists($file)) {
+            if (isset($file) && $this->local->exists($file)) {
                 $this->local->remove($file);
             }
-            if ($source && $this->local->exists($source)) {
+            if (isset($source) && $this->local->exists($source)) {
                 $this->local->remove($source);
             }
         }
@@ -112,6 +121,8 @@ class Manager
     /**
      * @param string $source
      *
+     * @throws ArchiveException
+     *
      * @return string
      */
     private function pack($source)
@@ -127,6 +138,8 @@ class Manager
 
     /**
      * @param string $target
+     *
+     * @throws ExtractException
      *
      * @return string
      */
